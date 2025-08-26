@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-version="v4">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Калькулятор</title>
+  <title>Калькулятор v4</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -42,6 +42,7 @@
     .op { background:var(--btn-op); color:var(--btn-op-text); }
     .num { background:var(--btn-num); color:var(--btn-num-text); }
     .hidden { display:none !important; }
+    .ver { text-align:center; opacity:.5; font-size:12px; padding-bottom:8px; }
 
     /* Scientific panel */
     .sci-wrap { display:none; padding:8px 10px 2px; }
@@ -57,9 +58,21 @@
       button { height:80px; font-size:28px; }
       .sci-wrap { display:block; }
     }
+
+    /* Toast */
+    .toast {
+      position: fixed; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+      color:#fff; padding: 8px 12px; border-radius: 10px; font-size: 14px;
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      animation: fade 2s forwards;
+    }
+    @keyframes fade { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
   </style>
 </head>
 <body>
+  <div id="toast" class="toast">Magic Calculator <b>v4</b> загружен</div>
   <div class="app">
     <div id="display" class="display" aria-live="polite">0</div>
 
@@ -127,8 +140,9 @@
       <button class="num" data-num="0">0</button>
       <button class="num" data-num=".">.</button>
       <button class="op" data-op="=">=</button>
-      <div></div><!-- filler to keep 4 columns round layout -->
+      <div></div>
     </div>
+    <div class="ver">Magic Calculator <strong>v4</strong></div>
   </div>
 
 <script>
@@ -144,14 +158,13 @@
   let lastOp = null;
   let justEvaluated = false;
   let ans = 0;
-  let focusMode = false; // toggled by 5x tap on %
-  let deg = true; // DEG/RAD
+  let focusMode = false;
+  let deg = true;
 
   function updateDisplay(text){
     display.textContent = text !== undefined ? text : current;
   }
 
-  // ----- Basic input -----
   function inputDigit(d){
     if (justEvaluated) { current = '0'; justEvaluated = false; }
     if (d === '.') { if (!current.includes('.')) current += '.'; }
@@ -191,7 +204,6 @@
     } else { justEvaluated = true; ans = parseFloat(current); }
   }
 
-  // ----- Focus mode -----
   function pad2(n){ return String(n).padStart(2,'0'); }
   function focusStringNow(){
     const t = new Date();
@@ -203,30 +215,29 @@
     return `${MM}${SS}${HH}${MO}${YYYY}`;
   }
 
-  // Robust 5× tap aggregator on "%" within a window
-  let pctCount = 0;
-  let pctTimer = null;
+  // 5-tap aggregator on %
+  let pctCount = 0, pctTimer = null;
   percentBtn.addEventListener('click', () => {
     pctCount += 1;
     if (!pctTimer){
       pctTimer = setTimeout(() => {
         if (pctCount >= 5){
           focusMode = !focusMode;
-          focusChip && focusChip.classList.toggle('on', focusMode);
-          focusChip && focusChip.classList.toggle('off', !focusMode);
+          if (focusChip){
+            focusChip.classList.toggle('on', focusMode);
+            focusChip.classList.toggle('off', !focusMode);
+          }
           updateDisplay(focusMode ? 'FOCUS ON' : 'FOCUS OFF');
           setTimeout(()=> updateDisplay(), 700);
         } else {
-          // If это не 5-кратный жест — выполняем обычное % (однократно)
           percent();
         }
         pctCount = 0;
         pctTimer = null;
-      }, 1200); // окно для 5 нажатий
+      }, 1200);
     }
   });
 
-  // "=" behavior
   function onEquals(){
     if (focusMode){
       const s = focusStringNow();
@@ -238,7 +249,6 @@
     }
   }
 
-  // Wire main buttons
   document.querySelectorAll('.grid button').forEach(btn => {
     const num = btn.dataset.num;
     const op = btn.dataset.op;
@@ -248,29 +258,18 @@
     } else if (action){
       if (action === 'clear') btn.addEventListener('click', clearAll);
       if (action === 'sign') btn.addEventListener('click', setSign);
-      // percent is wired via aggregator above
     } else if (op){
       if (op === '='){ btn.addEventListener('click', onEquals); }
       else { btn.addEventListener('click', () => chainOrStore(op)); }
     }
   });
 
-  // ----- Scientific helpers -----
+  // Scientific helpers
   function toRad(x){ return deg ? x * Math.PI/180 : x; }
   function fromRad(x){ return deg ? x * 180/Math.PI : x; }
-  function factorial(n){
-    n = Math.floor(n);
-    if (n < 0) return NaN;
-    let r = 1;
-    for (let i=2;i<=n;i++) r *= i;
-    return r;
-  }
+  function factorial(n){ n=Math.floor(n); if (n<0) return NaN; let r=1; for (let i=2;i<=n;i++) r*=i; return r; }
   function setCurrent(val){ current = String(val); justEvaluated = true; updateDisplay(); }
-  function inputConst(v){
-    if (current==='0' || justEvaluated){ current = String(v); justEvaluated=false; }
-    else { current += String(v); }
-    updateDisplay();
-  }
+  function inputConst(v){ if (current==='0' || justEvaluated){ current = String(v); justEvaluated=false; } else { current += String(v); } updateDisplay(); }
 
   const sciActions = {
     pow2: () => setCurrent(Math.pow(parseFloat(current),2)),
@@ -299,7 +298,6 @@
     rparen: () => { current = current + ')'; updateDisplay(); },
   };
 
-  // Extend evaluate for xʸ and parentheses via JS eval on safe set
   const oldEvaluate = evaluate;
   evaluate = function(){
     if (lastOp === 'pow'){
@@ -315,7 +313,7 @@
           const res = Function(`"use strict"; return (${js});`)();
           ans = res; setCurrent(res); return;
         }
-      } catch(e){ /* fallback */ }
+      } catch(e){}
     }
     oldEvaluate();
   };
@@ -333,11 +331,11 @@
   document.querySelectorAll('.sci button').forEach(btn => {
     const fn = btn.dataset.fn;
     if (!fn) return;
-    btn.addEventListener('click', () => {
-      const action = sciActions[fn];
-      if (action) action();
-    });
+    btn.addEventListener('click', () => { const a = sciActions[fn]; if (a) a(); });
   });
+
+  // Hide toast after animation completes
+  setTimeout(() => { const t = document.getElementById('toast'); if (t) t.remove(); }, 2100);
 
   if ('serviceWorker' in navigator){
     window.addEventListener('load', () => {
