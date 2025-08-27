@@ -1,84 +1,50 @@
 <!DOCTYPE html>
-<html lang="ru" data-version="v4">
+<html lang="ru" data-version="v5">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Калькулятор v4</title>
-  <link rel="manifest" href="manifest.json">
+  <title>Калькулятор v5</title>
+  <link rel="manifest" href="manifest.json?v=5">
   <meta name="theme-color" content="#000000">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png?v=5">
   <style>
     :root {
-      --bg: #000;
-      --display-bg: #000;
-      --text: #fff;
-      --btn-num: #333333;
-      --btn-fn: #a5a5a5;
-      --btn-op: #ff9f0a;
-      --btn-num-text: #fff;
-      --btn-fn-text: #000;
-      --btn-op-text: #fff;
+      --bg: #000; --display-bg: #000; --text: #fff;
+      --btn-num:#333333; --btn-fn:#a5a5a5; --btn-op:#ff9f0a;
+      --btn-num-text:#fff; --btn-fn-text:#000; --btn-op-text:#fff;
     }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0; background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      height: 100%;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;height:100%;
+      touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    .app{display:flex;flex-direction:column;height:100dvh;max-width:980px;margin:0 auto}
+    .display{flex:1;display:flex;align-items:flex-end;justify-content:flex-end;padding:28px;font-size:72px;font-weight:300;background:var(--display-bg);overflow:hidden;user-select:none}
+    .grid{padding:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    button{border:none;border-radius:50%;height:90px;aspect-ratio:1/1;font-size:32px;cursor:pointer}
+    .fn{background:var(--btn-fn);color:var(--btn-fn-text)}
+    .op{background:var(--btn-op);color:var(--btn-op-text)}
+    .num{background:var(--btn-num);color:var(--btn-num-text)}
+    .hidden{display:none!important}
+    .ver{text-align:center;opacity:.5;font-size:12px;padding-bottom:8px}
+    .sci-wrap{display:none;padding:8px 10px 2px}
+    .sci{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+    .sci button{height:64px;aspect-ratio:1/1;border-radius:18px;font-size:18px}
+    .chip{height:40px;border-radius:12px;padding:0 14px;font-size:15px;display:inline-flex;align-items:center}
+    .chip.on{background:#34c759;color:#000}
+    .chip.off{background:#3a3a3c;color:#fff}
+    @media(orientation:landscape){
+      .display{font-size:56px;padding:18px 24px}
+      .grid{grid-template-columns:repeat(6,1fr)}
+      button{height:80px;font-size:28px}
+      .sci-wrap{display:block}
     }
-    .app { display:flex; flex-direction:column; height:100dvh; max-width: 980px; margin:0 auto; }
-    .display {
-      flex: 1; display:flex; align-items:flex-end; justify-content:flex-end;
-      padding:28px; font-size:72px; font-weight:300; background:var(--display-bg);
-      overflow:hidden; user-select:none;
-    }
-    .grid { padding:10px; display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
-    button {
-      border:none; border-radius:50%; height:90px; aspect-ratio:1/1;
-      font-size:32px; cursor:pointer;
-    }
-    .fn { background:var(--btn-fn); color:var(--btn-fn-text); }
-    .op { background:var(--btn-op); color:var(--btn-op-text); }
-    .num { background:var(--btn-num); color:var(--btn-num-text); }
-    .hidden { display:none !important; }
-    .ver { text-align:center; opacity:.5; font-size:12px; padding-bottom:8px; }
-
-    /* Scientific panel */
-    .sci-wrap { display:none; padding:8px 10px 2px; }
-    .sci { display:grid; grid-template-columns: repeat(8, 1fr); gap:8px; }
-    .sci button { height:64px; aspect-ratio: 1/1; border-radius: 18px; font-size:18px; }
-    .chip { height:40px; border-radius: 12px; padding:0 14px; font-size:15px; display:inline-flex; align-items:center; }
-    .chip.on { background:#34c759; color:#000; }
-    .chip.off { background:#3a3a3c; color:#fff; }
-
-    @media (orientation: landscape) {
-      .display { font-size: 56px; padding: 18px 24px; }
-      .grid { grid-template-columns: repeat(6, 1fr); }
-      button { height:80px; font-size:28px; }
-      .sci-wrap { display:block; }
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed; top: 12px; right: 12px;
-      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
-      color:#fff; padding: 8px 12px; border-radius: 10px; font-size: 14px;
-      backdrop-filter: blur(6px);
-      z-index: 9999;
-      animation: fade 2s forwards;
-    }
-    @keyframes fade { 0%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
   </style>
 </head>
 <body>
-  <div id="toast" class="toast">Magic Calculator <b>v4</b> загружен</div>
   <div class="app">
-    <div id="display" class="display" aria-live="polite">0</div>
-
-    <!-- scientific controls (landscape only) -->
+    <div id="display" class="display" aria-live="polite">v5 ready</div>
     <div class="sci-wrap">
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 4px 8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 8px;">
         <div>
           <button id="degBtn" class="chip on">DEG</button>
           <button id="radBtn" class="chip off">RAD</button>
@@ -94,7 +60,6 @@
         <button class="fn" data-fn="fact">x!</button>
         <button class="fn" data-fn="lparen">(</button>
         <button class="fn" data-fn="rparen">)</button>
-
         <button class="fn" data-fn="sin">sin</button>
         <button class="fn" data-fn="cos">cos</button>
         <button class="fn" data-fn="tan">tan</button>
@@ -103,7 +68,6 @@
         <button class="fn" data-fn="atan">tan⁻¹</button>
         <button class="fn" data-fn="pi">π</button>
         <button class="fn" data-fn="e">e</button>
-
         <button class="fn" data-fn="exp">eˣ</button>
         <button class="fn" data-fn="ln">ln</button>
         <button class="fn" data-fn="log">log₁₀</button>
@@ -115,34 +79,29 @@
       </div>
     </div>
 
-    <!-- main grid -->
     <div class="grid" role="group" aria-label="Кнопки калькулятора">
       <button id="ac" class="fn" data-action="clear">AC</button>
       <button id="sign" class="fn" data-action="sign">±</button>
       <button id="percent" class="fn" data-action="percent">%</button>
       <button class="op" data-op="÷">÷</button>
-
       <button class="num" data-num="7">7</button>
       <button class="num" data-num="8">8</button>
       <button class="num" data-num="9">9</button>
       <button class="op" data-op="×">×</button>
-
       <button class="num" data-num="4">4</button>
       <button class="num" data-num="5">5</button>
       <button class="num" data-num="6">6</button>
       <button class="op" data-op="−">−</button>
-
       <button class="num" data-num="1">1</button>
       <button class="num" data-num="2">2</button>
       <button class="num" data-num="3">3</button>
       <button class="op" data-op="+">+</button>
-
       <button class="num" data-num="0">0</button>
       <button class="num" data-num=".">.</button>
       <button class="op" data-op="=">=</button>
       <div></div>
     </div>
-    <div class="ver">Magic Calculator <strong>v4</strong></div>
+    <div class="ver">Magic Calculator <strong>v5</strong></div>
   </div>
 
 <script>
@@ -152,194 +111,36 @@
   const degBtn = document.getElementById('degBtn');
   const radBtn = document.getElementById('radBtn');
 
-  // State
-  let current = '0';
-  let stored = null;
-  let lastOp = null;
-  let justEvaluated = false;
-  let ans = 0;
-  let focusMode = false;
-  let deg = true;
-
-  function updateDisplay(text){
-    display.textContent = text !== undefined ? text : current;
-  }
-
-  function inputDigit(d){
-    if (justEvaluated) { current = '0'; justEvaluated = false; }
-    if (d === '.') { if (!current.includes('.')) current += '.'; }
-    else { current = (current === '0') ? String(d) : current + String(d); }
-    updateDisplay();
-  }
+  let current='0', stored=null, lastOp=null, justEvaluated=false, ans=0;
+  let focusMode=false, deg=true;
+  function updateDisplay(text){ display.textContent=(text!==undefined)?text:current; }
+  function inputDigit(d){ if (justEvaluated){ current='0'; justEvaluated=false; } if(d==='.') { if(!current.includes('.')) current+='.'; } else { current=(current==='0')?String(d):current+String(d); } updateDisplay(); }
   function clearAll(){ current='0'; stored=null; lastOp=null; justEvaluated=false; updateDisplay(); }
-  function setSign(){ if (current.startsWith('-')) current=current.slice(1); else if (current!=='0') current='-'+current; updateDisplay(); }
-  function percent(){ current = String(parseFloat(current||'0')/100); updateDisplay(); }
-
-  function evalPair(a,b,op){
-    switch(op){
-      case '+': return a + b;
-      case '−': return a - b;
-      case '×': return a * b;
-      case '÷': return b === 0 ? NaN : a / b;
-      default: return b;
-    }
-  }
-  function chainOrStore(op){
-    if (stored === null){ stored = parseFloat(current); current = '0'; }
-    else {
-      const a=stored, b=parseFloat(current);
-      stored = evalPair(a,b,lastOp || op);
-      current = '0';
-    }
-    lastOp = op;
-  }
-  function evaluate(){
-    if (lastOp !== null){
-      const a = stored, b = parseFloat(current);
-      const res = evalPair(a,b,lastOp);
-      ans = res;
-      current = String(res);
-      stored = null; lastOp = null; justEvaluated = true;
-      updateDisplay();
-    } else { justEvaluated = true; ans = parseFloat(current); }
-  }
-
+  function setSign(){ if(current.startsWith('-')) current=current.slice(1); else if(current!=='0') current='-'+current; updateDisplay(); }
+  function percent(){ current=String(parseFloat(current||'0')/100); updateDisplay(); }
+  function evalPair(a,b,op){ switch(op){case '+':return a+b;case '−':return a-b;case '×':return a*b;case '÷':return b===0?NaN:a/b;default:return b;} }
+  function chainOrStore(op){ if(stored===null){ stored=parseFloat(current); current='0'; } else { const a=stored,b=parseFloat(current); stored=evalPair(a,b,lastOp||op); current='0'; } lastOp=op; }
+  function evaluate(){ if(lastOp!==null){ const a=stored,b=parseFloat(current); const res=evalPair(a,b,lastOp); ans=res; current=String(res); stored=null; lastOp=null; justEvaluated=true; updateDisplay(); } else { justEvaluated=true; ans=parseFloat(current); } }
   function pad2(n){ return String(n).padStart(2,'0'); }
-  function focusStringNow(){
-    const t = new Date();
-    const MM = pad2(t.getMinutes());
-    const SS = pad2(t.getSeconds());
-    const HH = pad2(t.getHours());
-    const MO = pad2(t.getMonth() + 1);
-    const YYYY = String(t.getFullYear());
-    return `${MM}${SS}${HH}${MO}${YYYY}`;
-  }
-
-  // 5-tap aggregator on %
-  let pctCount = 0, pctTimer = null;
-  percentBtn.addEventListener('click', () => {
-    pctCount += 1;
-    if (!pctTimer){
-      pctTimer = setTimeout(() => {
-        if (pctCount >= 5){
-          focusMode = !focusMode;
-          if (focusChip){
-            focusChip.classList.toggle('on', focusMode);
-            focusChip.classList.toggle('off', !focusMode);
-          }
-          updateDisplay(focusMode ? 'FOCUS ON' : 'FOCUS OFF');
-          setTimeout(()=> updateDisplay(), 700);
-        } else {
-          percent();
-        }
-        pctCount = 0;
-        pctTimer = null;
-      }, 1200);
-    }
-  });
-
-  function onEquals(){
-    if (focusMode){
-      const s = focusStringNow();
-      current = s;
-      stored = null; lastOp = null; justEvaluated = true;
-      updateDisplay();
-    } else {
-      evaluate();
-    }
-  }
-
-  document.querySelectorAll('.grid button').forEach(btn => {
-    const num = btn.dataset.num;
-    const op = btn.dataset.op;
-    const action = btn.dataset.action;
-    if (num !== undefined){
-      btn.addEventListener('click', () => inputDigit(num));
-    } else if (action){
-      if (action === 'clear') btn.addEventListener('click', clearAll);
-      if (action === 'sign') btn.addEventListener('click', setSign);
-    } else if (op){
-      if (op === '='){ btn.addEventListener('click', onEquals); }
-      else { btn.addEventListener('click', () => chainOrStore(op)); }
-    }
-  });
-
-  // Scientific helpers
-  function toRad(x){ return deg ? x * Math.PI/180 : x; }
-  function fromRad(x){ return deg ? x * 180/Math.PI : x; }
-  function factorial(n){ n=Math.floor(n); if (n<0) return NaN; let r=1; for (let i=2;i<=n;i++) r*=i; return r; }
-  function setCurrent(val){ current = String(val); justEvaluated = true; updateDisplay(); }
-  function inputConst(v){ if (current==='0' || justEvaluated){ current = String(v); justEvaluated=false; } else { current += String(v); } updateDisplay(); }
-
-  const sciActions = {
-    pow2: () => setCurrent(Math.pow(parseFloat(current),2)),
-    pow3: () => setCurrent(Math.pow(parseFloat(current),3)),
-    sqrt: () => setCurrent(Math.sqrt(parseFloat(current))),
-    cbrt: () => setCurrent(Math.cbrt(parseFloat(current))),
-    inv:  () => setCurrent(1/parseFloat(current)),
-    fact: () => setCurrent(factorial(parseFloat(current))),
-    sin:  () => setCurrent(Math.sin(toRad(parseFloat(current)))),
-    cos:  () => setCurrent(Math.cos(toRad(parseFloat(current)))),
-    tan:  () => setCurrent(Math.tan(toRad(parseFloat(current)))),
-    asin: () => setCurrent(fromRad(Math.asin(parseFloat(current)))),
-    acos: () => setCurrent(fromRad(Math.acos(parseFloat(current)))),
-    atan: () => setCurrent(fromRad(Math.atan(parseFloat(current)))),
-    ln:   () => setCurrent(Math.log(parseFloat(current))),
-    log:  () => setCurrent(Math.log10(parseFloat(current))),
-    exp:  () => setCurrent(Math.exp(parseFloat(current))),
-    pi:   () => inputConst(Math.PI),
-    e:    () => inputConst(Math.E),
-    pow:  () => { stored = parseFloat(current); lastOp = 'pow'; justEvaluated=false; current='0'; updateDisplay(); },
-    percent: () => percent(),
-    ans:  () => { current = String(ans); updateDisplay(); },
-    clear: () => clearAll(),
-    bksp: () => { if (!justEvaluated){ current = current.length>1 ? current.slice(0,-1) : '0'; updateDisplay(); } },
-    lparen: () => { current = current + '('; updateDisplay(); },
-    rparen: () => { current = current + ')'; updateDisplay(); },
-  };
-
-  const oldEvaluate = evaluate;
-  evaluate = function(){
-    if (lastOp === 'pow'){
-      const x = stored, y = parseFloat(current);
-      const res = Math.pow(x,y);
-      ans = res; current = String(res); stored=null; lastOp=null; justEvaluated=true; updateDisplay(); return;
-    }
-    if (/[()πe]/.test(current)){
-      try {
-        const safe = current.replace(/π/g, `${Math.PI}`).replace(/e/g, `${Math.E}`);
-        if (/^[0-9+\-*/().\sEPIeπ]+$/.test(current.replace(/[÷×−]/g,''))){
-          const js = safe.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-');
-          const res = Function(`"use strict"; return (${js});`)();
-          ans = res; setCurrent(res); return;
-        }
-      } catch(e){}
-    }
-    oldEvaluate();
-  };
-
-  function setDegRad(isDeg){
-    deg = isDeg;
-    degBtn.classList.toggle('on', isDeg);
-    degBtn.classList.toggle('off', !isDeg);
-    radBtn.classList.toggle('on', !isDeg);
-    radBtn.classList.toggle('off', isDeg);
-  }
-  degBtn.addEventListener('click', ()=> setDegRad(true));
-  radBtn.addEventListener('click', ()=> setDegRad(false));
-
-  document.querySelectorAll('.sci button').forEach(btn => {
-    const fn = btn.dataset.fn;
-    if (!fn) return;
-    btn.addEventListener('click', () => { const a = sciActions[fn]; if (a) a(); });
-  });
-
-  // Hide toast after animation completes
-  setTimeout(() => { const t = document.getElementById('toast'); if (t) t.remove(); }, 2100);
-
-  if ('serviceWorker' in navigator){
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  function focusStringNow(){ const t=new Date(); return pad2(t.getMinutes())+pad2(t.getSeconds())+pad2(t.getHours())+pad2(t.getMonth()+1)+String(t.getFullYear()); }
+  let pctCount=0,pctTimer=null;
+  percentBtn.addEventListener('click',()=>{ pctCount++; if(!pctTimer){ pctTimer=setTimeout(()=>{ if(pctCount>=5){ focusMode=!focusMode; if(focusChip){ focusChip.classList.toggle('on',focusMode); focusChip.classList.toggle('off',!focusMode);} updateDisplay(focusMode?'FOCUS ON':'FOCUS OFF'); setTimeout(()=>updateDisplay(),700);} else { percent(); } pctCount=0; pctTimer=null; },1200);} });
+  function onEquals(){ if(focusMode){ current=focusStringNow(); stored=null; lastOp=null; justEvaluated=true; updateDisplay(); } else { evaluate(); } }
+  document.querySelectorAll('.grid button').forEach(btn=>{ const num=btn.dataset.num,op=btn.dataset.op,action=btn.dataset.action; if(num!==undefined){ btn.addEventListener('click',()=>inputDigit(num)); } else if(action){ if(action==='clear') btn.addEventListener('click',clearAll); if(action==='sign') btn.addEventListener('click',setSign); } else if(op){ if(op==='=') btn.addEventListener('click',onEquals); else btn.addEventListener('click',()=>chainOrStore(op)); } });
+  function toRad(x){ return deg?x*Math.PI/180:x; } function fromRad(x){ return deg?x*180/Math.PI:x; } function factorial(n){ n=Math.floor(n); if(n<0) return NaN; let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
+  function setCurrent(v){ current=String(v); justEvaluated=true; updateDisplay(); }
+  function inputConst(v){ if(current==='0' || justEvaluated){ current=String(v); justEvaluated=false; } else { current+=String(v);} updateDisplay(); }
+  const sciActions={ pow2:()=>setCurrent(Math.pow(parseFloat(current),2)), pow3:()=>setCurrent(Math.pow(parseFloat(current),3)), sqrt:()=>setCurrent(Math.sqrt(parseFloat(current))), cbrt:()=>setCurrent(Math.cbrt(parseFloat(current))), inv:()=>setCurrent(1/parseFloat(current)), fact:()=>setCurrent(factorial(parseFloat(current))), sin:()=>setCurrent(Math.sin(toRad(parseFloat(current)))), cos:()=>setCurrent(Math.cos(toRad(parseFloat(current)))), tan:()=>setCurrent(Math.tan(toRad(parseFloat(current)))), asin:()=>setCurrent(fromRad(Math.asin(parseFloat(current)))), acos:()=>setCurrent(fromRad(Math.acos(parseFloat(current)))), atan:()=>setCurrent(fromRad(Math.atan(parseFloat(current)))), ln:()=>setCurrent(Math.log(parseFloat(current))), log:()=>setCurrent(Math.log10(parseFloat(current))), exp:()=>setCurrent(Math.exp(parseFloat(current))), pi:()=>inputConst(Math.PI), e:()=>inputConst(Math.E), pow:()=>{ stored=parseFloat(current); lastOp='pow'; justEvaluated=false; current='0'; updateDisplay(); }, percent:()=>percent(), ans:()=>{ current=String(ans); updateDisplay(); }, clear:()=>clearAll(), bksp:()=>{ if(!justEvaluated){ current=current.length>1?current.slice(0,-1):'0'; updateDisplay(); } }, lparen:()=>{ current=current+'('; updateDisplay(); }, rparen:()=>{ current=current+')'; updateDisplay(); } };
+  const oldEval=evaluate;
+  evaluate=function(){ if(lastOp==='pow'){ const x=stored,y=parseFloat(current); const res=Math.pow(x,y); ans=res; setCurrent(res); stored=null; lastOp=null; return; } if (/[()πe]/.test(current)){ try{ const safe=current.replace(/π/g,`${Math.PI}`).replace(/e/g,`${Math.E}`); if(/^[0-9+\-*/().\sEPIeπ]+$/.test(current.replace(/[÷×−]/g,''))){ const js=safe.replace(/÷/g,'/').replace(/×/g,'*').replace(/−/g,'-'); const res=Function('"use strict"; return ('+js+');')(); ans=res; setCurrent(res); return; } }catch(e){} } oldEval(); };
+  function setDegRad(isDeg){ deg=isDeg; degBtn.classList.toggle('on',isDeg); degBtn.classList.toggle('off',!isDeg); radBtn.classList.toggle('on',!isDeg); radBtn.classList.toggle('off',isDeg); }
+  degBtn.addEventListener('click',()=>setDegRad(true));
+  radBtn.addEventListener('click',()=>setDegRad(false));
+  document.querySelectorAll('.sci button').forEach(btn=>{ const fn=btn.dataset.fn; if(!fn) return; btn.addEventListener('click',()=>{ const a=sciActions[fn]; if(a) a(); }); });
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{
+      navigator.serviceWorker.register('./sw.js?v=5').then(reg=>{ if(reg.waiting){ reg.waiting.postMessage({type:'SKIP_WAITING'}); } }).catch(()=>{});
+      navigator.serviceWorker.addEventListener('controllerchange', ()=>{ location.reload(); });
     });
   }
 </script>
