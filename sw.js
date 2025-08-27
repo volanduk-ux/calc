@@ -1,5 +1,5 @@
-const CACHE = 'magic-calc-v5';
-const ASSETS = ['./', './index.html?v=5', './manifest.json?v=5'];
+const CACHE = 'magic-calc-v6';
+const ASSETS = ['./', './index.html?v=6', './manifest.json?v=6'];
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -11,7 +11,7 @@ self.addEventListener('activate', (e) => {
     await self.clients.claim();
   })());
 });
-function isHTML(req){ return req.mode === 'navigate' || (req.headers.get('accept')||'').includes('text/html'); }
+function isHTML(req){ return req.mode==='navigate' || (req.headers.get('accept')||'').includes('text/html'); }
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (isHTML(req)) {
@@ -19,9 +19,9 @@ self.addEventListener('fetch', (e) => {
       const copy = resp.clone();
       caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
       return resp;
-    }).catch(() => caches.match(req, {ignoreSearch:true}).then(r => r || caches.match('./index.html?v=5'))));
+    }).catch(() => caches.match(req, {ignoreSearch:true}).then(r => r || caches.match('./index.html?v=6'))));
     return;
   }
   e.respondWith(caches.match(req).then(r => r || fetch(req)));
 });
-self.addEventListener('message', (e) => { if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting(); });
+self.addEventListener('message', (e) => { if (e.data && e.data.type==='SKIP_WAITING') self.skipWaiting(); });
