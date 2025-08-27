@@ -1,5 +1,5 @@
-const CACHE = 'magic-calc-v6';
-const ASSETS = ['./', './index.html?v=6', './manifest.json?v=6'];
+const CACHE = 'magic-calc-v7';
+const ASSETS = ['./', './index.html?v=7', './manifest.json?v=7'];
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -19,7 +19,7 @@ self.addEventListener('fetch', (e) => {
       const copy = resp.clone();
       caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
       return resp;
-    }).catch(() => caches.match(req, {ignoreSearch:true}).then(r => r || caches.match('./index.html?v=6'))));
+    }).catch(() => caches.match(req, {ignoreSearch:true}).then(r => r || caches.match('./index.html?v=7'))));
     return;
   }
   e.respondWith(caches.match(req).then(r => r || fetch(req)));
